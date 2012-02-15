@@ -15,6 +15,7 @@
  
  */
 
+#include <LiquidCrystal.h>
 #include <SD.h>
 #include <SPI.h>
 #include <Ethernet.h>
@@ -34,6 +35,9 @@ byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 // (port 80 is default for HTTP):
 EthernetServer server(80);
 
+//Pins for the freetronics 16x2 LCD shield.
+LiquidCrystal lcd( 8, 9, 4, 5, 6, 7 );
+
 void setup()
 {
   // start the Ethernet connection and the server:
@@ -41,13 +45,16 @@ void setup()
   server.begin();
   dht.begin();
   SD.begin(CHIPSELECT);
+  lcd.begin(16,2);
 }
 
 void loop()
 {
   
-  float h = dht.readHumidity();
-  float t = dht.readTemperature();
+  float h = dht.readHumidity(); // Humidity
+  float t = dht.readTemperature(); // Temperature
+  
+  // SD Card Logging
   boolean sderror = false;
   File dataFile = SD.open("tempdata.csv", FILE_WRITE);
   if (dataFile) {
@@ -60,6 +67,18 @@ void loop()
   {
     sderror = true;
   }
+  
+  // Liquid Crystal Display
+  lcd.setCursor( 0, 0 );   //top left
+  //         1234567890123456
+  lcd.print("Humidity:   ");
+  lcd.print(             h);
+  //
+  lcd.setCursor( 0, 1 );   //bottom left
+  //         1234567890123456
+  lcd.print("Temperature:");
+  lcd.print(             t);
+  
   // listen for incoming clients
   EthernetClient client = server.available();
   if (client) {
