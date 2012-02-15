@@ -54,14 +54,17 @@ void loop()
   
   float h = dht.readHumidity(); // Humidity
   float t = dht.readTemperature(); // Temperature
+  int l = analogRead(A0); // Light level
   
   // SD Card Logging
   boolean sderror = false;
-  File dataFile = SD.open("tempdata.csv", FILE_WRITE);
+  File dataFile = SD.open("arduino_data.csv", FILE_WRITE);
   if (dataFile) {
     dataFile.print(h);
     dataFile.print(",");
-    dataFile.println(t);
+    dataFile.print(t);
+    dataFile.print(",");
+    dataFile.println(l);
     dataFile.close();
   }
   else
@@ -109,6 +112,9 @@ void loop()
             client.println("<temperature>");
             client.println(t);
             client.println("</temperature>");
+            client.println("<lightlevel>");
+            client.println(l);
+            client.println("</lightlevel>");
             client.println("<sdlogging>");
             if (sderror) {
               client.println("false");
