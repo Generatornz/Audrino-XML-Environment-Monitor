@@ -15,18 +15,19 @@
  
  */
 
+#include <SD.h>
 #include <SPI.h>
 #include <Ethernet.h>
 #include "DHT.h"
 #define DHTPIN 2
 #define DHTTYPE DHT22
+#define CHIPSELECT 4
 
 DHT dht(DHTPIN, DHTTYPE);
 
 // Enter a MAC address and IP address for your controller below.
 // The IP address will be dependent on your local network:
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-IPAddress ip(10,1,1,2);
 
 // Initialize the Ethernet server library
 // with the IP address and port you want to use 
@@ -36,13 +37,29 @@ EthernetServer server(80);
 void setup()
 {
   // start the Ethernet connection and the server:
-  Ethernet.begin(mac, ip);
+  Ethernet.begin(mac);
   server.begin();
   dht.begin();
+  SD.begin(CHIPSELECT);
 }
 
 void loop()
 {
+  
+  float h = dht.readHumidity();
+  float t = dht.readTemperature();
+  boolean sderror = false;
+  File dataFile = SD.open("tempdata.csv", FILE_WRITE);
+  if (dataFile) {
+    dataFile.print(h);
+    dataFile.print(",");
+    dataFile.println(t);
+    dataFile.close();
+  }
+  else
+  {
+    sderror = true;
+  }
   // listen for incoming clients
   EthernetClient client = server.available();
   if (client) {
@@ -55,8 +72,6 @@ void loop()
         // character) and the line is blank, the http request has ended,
         // so you can send a reply
         if (c == '\n' && currentLineIsBlank) {
-          float h = dht.readHumidity();
-          float t = dht.readTemperature();
           
           // send a standard http response header
           client.println("HTTP/1.1 200 OK");
@@ -74,6 +89,15 @@ void loop()
             client.println("<temperature>");
             client.println(t);
             client.println("</temperature>");
+            client.println("<sdlogging>");
+            if (sderror) {
+              client.println("false");
+            }
+            else
+            {
+              client.println("true");
+            }
+            client.println("</sdlogging>");
             client.println("</dhtdata>");
           }
           break;
