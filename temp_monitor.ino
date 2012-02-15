@@ -1,17 +1,18 @@
 /*
-  Web Server
+ DHT22 Web Service
  
- A simple web server that shows the value of the analog input pins.
- using an Arduino Wiznet Ethernet shield. 
+ Created by Matthew S. Cotterell on 15th Feburary 2012 (GPG Key ID: C9B4017475E2396C)
+ Based off projects by "ladyada", David A. Mellis and Tom Igoe 
  
  Circuit:
- * Ethernet shield attached to pins 10, 11, 12, 13
- * Analog inputs attached to pins A0 through A5 (optional)
+ * Ethernet shield attached to pins D10, D11, D12, D13
+ * DHT22 Humidity/Temperature sensor attached to pin D2
+ * TEMT6000 Light Sensor attached to analog pin A0
+ * 16x2 LCD Shield attached to pins D4, D5, D6, D7, D8 and D9
+ * Optional SD Card for logging
  
- created 18 Dec 2009
- by David A. Mellis
- modified 4 Sep 2010
- by Tom Igoe
+ Third-Party Libraries:
+ Modified version of the Freetronics DHT Sensor Library (https://github.com/freetronics/DHT-sensor-library/)
  
  */
 
@@ -79,7 +80,7 @@ void loop()
   lcd.print("Temperature:");
   lcd.print(             t);
   
-  // listen for incoming clients
+  // Ethernet HTTP Interface
   EthernetClient client = server.available();
   if (client) {
     // an http request ends with a blank line
